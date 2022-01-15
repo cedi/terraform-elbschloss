@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.0.9"
+  required_version = ">= 1.1.3"
   required_providers {
     hcloud = {
       source = "hetznercloud/hcloud"
@@ -10,7 +10,7 @@ terraform {
     }
   }
 
-  backend "remote" {
+  cloud {
     organization = "cedi"
     workspaces {
       name = "elbschloss"
