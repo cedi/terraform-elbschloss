@@ -18,10 +18,10 @@ terraform {
   }
 }
 
-provider "cloudflare" {
-  email   = var.cloudflare_email
-  api_key = var.cloudflare_api_key
-}
+#provider "cloudflare" {
+#  email   = var.cloudflare_email
+#  api_key = var.cloudflare_api_key
+#}
 
 provider "hcloud" {
   token = var.hcloud_token
