@@ -1,0 +1,139 @@
+name: "Pullrequest validate"
+
+on:
+  pull_request:
+
+jobs:
+  lint_terraform:
+    name: "Lint terraform code"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform format check
+        id: tffmt
+        continue-on-error: true
+        run: |
+          terraform fmt -check | tee terraform_fmt.txt
+          echo "::set-output name=fmt::$(sed ':a;N;$!ba;s/\n/{newline}/g' < terraform_fmt.txt)"
+
+      - name: Augment PR with terraform format infos
+        uses: actions/github-script@0.9.0
+        if: steps.tffmt.outcome != 'success'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### terraform fmt -check: 📖\`${{ steps.tffmt.outcome }}\`
+            <details><summary>Show results</summary>
+
+            \`\`\`${{ steps.tffmt.outputs.fmt }}\`\`\`
+
+            </details>
+
+            __Author:__ @${{ github.actor }},
+            __Action:__ \`${{ github.event_name }}\``;
+
+            new_output = output.replace(/{newline}/g, "\n");
+
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: new_output
+            })
+
+      - name: Terraform Validate
+        id: validate
+        continue-on-error: true
+        run: |
+          terraform validate | tee terraform_validate.txt
+          echo "::set-output name=validate::$(sed ':a;N;$!ba;s/\n/{newline}/g' < terraform_fmt.txt)"
+
+      - name: Augment PR with terraform format infos
+        uses: actions/github-script@0.9.0
+        if: steps.validate.outcome != 'success'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### terraform validate: 📖\`${{ steps.validate.outcome }}\`
+            <details><summary>Show results</summary>
+
+            \`\`\`
+            ${{ steps.validate.outputs.validate }}
+            \`\`\`
+
+            </details>
+
+            __Author:__ @${{ github.actor }},
+            __Action:__ \`${{ github.event_name }}\``;
+
+            new_output = output.replace(/{newline}/g, "\n");
+
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: new_output
+            })
+
+  terraform_plan:
+    name: "[Terraform] Deploy Infrastructure"
+    runs-on: ubuntu-latest
+    needs: lint_terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan -no-color | tee plan.txt
+          echo "::set-output name=tfplan::$(sed ':a;N;$!ba;s/\n/{newline}/g' < plan.txt)"
+        continue-on-error: true
+
+      - name: Augment PR with terraform plan infos
+        uses: actions/github-script@0.9.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            <details><summary>Show Plan</summary>
+
+            \`\`\`terraform
+            ${{ steps.plan.outputs.tfplan }}
+            \`\`\`
+
+            </details>
+
+            __Author:__ @${{ github.actor }},
+            __Action:__ \`${{ github.event_name }}\``;
+
+            new_output = output.replace(/{newline}/g, "\n");
+
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: new_output
+            })
