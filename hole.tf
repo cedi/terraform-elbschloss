@@ -15,9 +15,15 @@ resource "hcloud_server" "hole" {
   }
 }
 
-resource "hcloud_rdns" "hole" {
+resource "hcloud_rdns" "hole_v4" {
   server_id  = hcloud_server.hole.id
   ip_address = hcloud_server.hole.ipv4_address
+  dns_ptr    = "${hcloud_server.hole.name}.${var.dns_name}"
+}
+
+resource "hcloud_rdns" "hole_v6" {
+  server_id  = hcloud_server.hole.id
+  ip_address = hcloud_server.hole.ipv6_address
   dns_ptr    = "${hcloud_server.hole.name}.${var.dns_name}"
 }
 
