@@ -1,6 +1,6 @@
 resource "hcloud_server" "hole" {
   name        = "hole"
-  count = 3
+  count       = 3
   server_type = "cx11"
   image       = "ubuntu-20.04"
   location    = "fsn1"
