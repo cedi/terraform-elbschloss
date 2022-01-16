@@ -14,3 +14,7 @@ resource "hcloud_ssh_key" "cedi_devpi" {
   name       = "cedi@devpi"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFd4lpqMI7I9fPboMNhGzVrel0cir3D7bHLHADqE1Kmf"
 }
+resource "hcloud_ssh_key" "root_adguard" {
+  name       = "root@adguard"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICojfpCZvrJG0nceVKZcL2fi0UJuWy38L8VyuTEBN6/x root@adguard"
+}
