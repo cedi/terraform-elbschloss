@@ -1,6 +1,5 @@
 resource "hcloud_server" "hole" {
   name        = "hole"
-  count       = 3
   server_type = "cx11"
   image       = "ubuntu-20.04"
   location    = "fsn1"
@@ -14,4 +13,26 @@ resource "hcloud_server" "hole" {
   labels = {
     "role" = "dns"
   }
+}
+
+resource "hcloud_rdns" "hole" {
+  server_id  = hcloud_server.hole.id
+  ip_address = hcloud_server.hole.ipv4_address
+  dns_ptr    = "${hcloud_server.hole.name}.${var.dns_name}"
+}
+
+resource "cloudflare_record" "hole_v4" {
+  zone_id = var.cloudflare_zone_id
+  name    = hcloud_server.hole.name
+  value   = hcloud_server.hole.ipv4_address
+  type    = "A"
+  ttl     = 1
+}
+
+resource "cloudflare_record" "hole_v6" {
+  zone_id = var.cloudflare_zone_id
+  name    = hcloud_server.hole.name
+  value   = hcloud_server.hole.ipv6_address
+  type    = "AAAA"
+  ttl     = 1
 }
