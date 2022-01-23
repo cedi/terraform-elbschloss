@@ -108,6 +108,17 @@ resource "hcloud_firewall" "dns-fw" {
   }
 
   rule {
+    description = "allow DNS over QUIC from ANY"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "784"
+    source_ips = [
+      "0.0.0.0/0",
+      "::/0",
+    ]
+  }
+
+  rule {
     description = "allow Admin-UI from ANY"
     direction   = "in"
     protocol    = "tcp"
@@ -118,4 +129,14 @@ resource "hcloud_firewall" "dns-fw" {
     ]
   }
 
+  rule {
+    description = "allow NodeExporter Traffic"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "9100"
+    source_ips = [
+      "0.0.0.0/0",
+      "::/0",
+    ]
+  }
 }
