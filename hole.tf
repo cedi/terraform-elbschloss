@@ -5,7 +5,7 @@ resource "hcloud_server" "hole" {
   location    = "fsn1"
   ssh_keys = [
     hcloud_ssh_key.cedi_ivy.name,
-    hcloud_ssh_key.cedi_ava.name,
+    hcloud_ssh_key.cedi_mae.name,
     hcloud_ssh_key.cedi_liv.name,
     hcloud_ssh_key.cedi_devpi.name
   ]
