@@ -139,4 +139,15 @@ resource "hcloud_firewall" "dns-fw" {
       "::/0",
     ]
   }
+
+  rule {
+    description = "allow AdguardHomeExporter Traffic"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "9617"
+    source_ips = [
+      "0.0.0.0/0",
+      "::/0",
+    ]
+  }
 }
